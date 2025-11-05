@@ -18,3 +18,7 @@ git init
 6) Adicionar os arquivos
 para o envio ao github
 git add .
+
+7) Adicionar mensagem
+para o envio ao github
+git commit -m "Sua mensagem"

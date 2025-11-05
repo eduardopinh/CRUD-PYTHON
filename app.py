@@ -6,10 +6,10 @@ app = Flask(__name__)
 
 # Configuração da conexão com o banco de dados MySQL
 db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="senac123456789",
-    database="biblioteca"
+    host="",
+    user="",
+    password="",
+    database=""
 )
 
 # Criar cursor para executar queries
