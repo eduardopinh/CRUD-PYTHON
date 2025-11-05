@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Livros - Sistema de Biblioteca</title>
+</head>
+<body>
+    <h1>Lista de Livros</h1>
+    
+    <p><a href="{{ url_for('pagina_criar') }}">+ Adicionar Novo Livro</a></p>
+    
+    {% if not livros %}
+        <p>Nenhum livro encontrado no sistema.</p>
+    {% else %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Ano</th>
+                    <th>Editora</th>
+                    <th>ISBN</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for livro in livros %}
+                    <tr>
+                        <td>{{ livro.id }}</td>
+                        <td>{{ livro.titulo }}</td>
+                        <td>{{ livro.ano_publicacao if livro.ano_publicacao else 'N/A' }}</td>
+                        <td>{{ livro.editora if livro.editora else 'N/A' }}</td>
+                        <td>{{ livro.isbn if livro.isbn else 'N/A' }}</td>
+                        <td>
+                            <a href="/editar/{{ livro.id }}">Editar</a>
+                            |
+                            <a href="/deletar/{{ livro.id }}" 
+                               onclick="return confirm('Tem certeza que deseja excluir este livro?')">
+                                Excluir
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <p><strong>Total de livros:</strong> {{ livros|length }}</p>
+    {% endif %}
+    
+    <hr>
+    
+    <p><strong>Navegação:</strong></p>
+    <p>
+        <a href="{{ url_for('index') }}">← Voltar ao Início</a> | 
+        <a href="{{ url_for('pagina_criar') }}">Adicionar Novo Livro</a>
+    </p>
+</body>
+</html>

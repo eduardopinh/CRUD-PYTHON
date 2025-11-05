@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Novo Livro - Sistema de Biblioteca</title>
+</head>
+<body>
+    <h1>Adicionar Novo Livro</h1>
+    
+    <form action="{{ url_for('criar_livro') }}" method="POST">
+        <h2>Informações do Livro</h2>
+        
+        <p>
+            <label for="titulo">Título:</label><br>
+            <input type="text" id="titulo" name="titulo" required maxlength="150">
+        </p>
+        
+        <p>
+            <label for="ano_publicacao">Ano de Publicação:</label><br>
+            <input type="number" id="ano_publicacao" name="ano_publicacao" min="1000" max="2024">
+        </p>
+        
+        <p>
+            <label for="editora">Editora:</label><br>
+            <input type="text" id="editora" name="editora" maxlength="100">
+        </p>
+        
+        <p>
+            <label for="isbn">ISBN:</label><br>
+            <input type="text" id="isbn" name="isbn">
+        </p>
+        
+        <p>
+            <button type="submit">Adicionar Livro</button>
+            <button type="reset">Limpar Formulário</button>
+        </p>
+    </form>
+    
+    <hr>
+    
+    <p><strong>Navegação:</strong></p>
+    <p>
+        <a href="{{ url_for('index') }}">← Voltar ao Início</a> | 
+        <a href="{{ url_for('listar') }}">Ver Lista de Livros</a>
+    </p>
+</body>
+</html>

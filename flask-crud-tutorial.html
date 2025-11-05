@@ -1,0 +1,321 @@
+<h1 id="tutorial-criando-um-crud-com-flask-e-mysql">Tutorial: Criando um
+CRUD com Flask e MySQL</h1>
+<h2 id="introdução">Introdução</h2>
+<p>Flask é um micro-framework web em Python, conhecido por sua
+simplicidade e flexibilidade. É ideal para criar aplicações web e APIs
+de forma rápida e eficiente. Neste tutorial, vamos criar um CRUD
+(Create, Read, Update, Delete) básico usando Flask com MySQL.</p>
+<h2 id="instalação-das-dependências">1. Instalação das Dependências</h2>
+<p>Primeiro, vamos instalar as bibliotecas necessárias. Abra o terminal
+e execute:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install flask</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install mysql-connector-python</span></code></pre></div>
+<h2 id="estrutura-do-projeto">2. Estrutura do Projeto</h2>
+<p>Organize seu projeto com a seguinte estrutura:</p>
+<pre><code>projeto/
+    ├── app.py
+    └── templates/
+        ├── index.html
+        ├── criar.html
+        ├── listar.html
+        └── editar.html</code></pre>
+<h2 id="configuração-inicial-app.py">3. Configuração Inicial
+(app.py)</h2>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> flask <span class="im">import</span> Flask, render_template, request, redirect, url_for</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mysql.connector</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Criação da aplicação Flask</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> Flask(<span class="va">__name__</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Configuração da conexão com o banco de dados MySQL</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>db <span class="op">=</span> mysql.connector.<span class="ex">connect</span>(</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    host<span class="op">=</span><span class="st">&quot;localhost&quot;</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    user<span class="op">=</span><span class="st">&quot;seu_usuario&quot;</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    password<span class="op">=</span><span class="st">&quot;sua_senha&quot;</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    database<span class="op">=</span><span class="st">&quot;biblioteca&quot;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar cursor para executar queries</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>cursor <span class="op">=</span> db.cursor()</span></code></pre></div>
+<h2 id="rotas-do-sistema">4. Rotas do Sistema</h2>
+<h3 id="rota-principal">4.1. Rota Principal</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">&#39;/&#39;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> index():</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> render_template(<span class="st">&#39;index.html&#39;</span>)</span></code></pre></div>
+<h3 id="rota-para-página-de-criação">4.2. Rota para Página de
+Criação</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">&#39;/criar&#39;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pagina_criar():</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> render_template(<span class="st">&#39;criar.html&#39;</span>)</span></code></pre></div>
+<h3 id="rota-para-criar-livro">4.3. Rota para Criar Livro</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">&#39;/criar/novo&#39;</span>, methods<span class="op">=</span>[<span class="st">&#39;POST&#39;</span>])</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> criar_livro():</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    titulo <span class="op">=</span> request.form[<span class="st">&#39;titulo&#39;</span>]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    ano_publicacao <span class="op">=</span> request.form[<span class="st">&#39;ano_publicacao&#39;</span>]</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    editora <span class="op">=</span> request.form[<span class="st">&#39;editora&#39;</span>]</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    isbn <span class="op">=</span> request.form[<span class="st">&#39;isbn&#39;</span>]</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    query <span class="op">=</span> <span class="st">&quot;INSERT INTO livro (titulo, ano_publicacao, editora, isbn) VALUES (</span><span class="sc">%s</span><span class="st">, </span><span class="sc">%s</span><span class="st">, </span><span class="sc">%s</span><span class="st">, </span><span class="sc">%s</span><span class="st">)&quot;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> (titulo, ano_publicacao, editora, isbn)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    cursor.execute(query, values)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    db.commit()</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> redirect(url_for(<span class="st">&#39;index&#39;</span>))</span></code></pre></div>
+<h3 id="rota-para-listar-livros">4.4. Rota para Listar Livros</h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">&#39;/listar&#39;</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> listar():</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    cursor.execute(<span class="st">&quot;SELECT * FROM livro&quot;</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    livros <span class="op">=</span> cursor.fetchall()</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> render_template(<span class="st">&#39;listar.html&#39;</span>, livros<span class="op">=</span>livros)</span></code></pre></div>
+<h3 id="rota-para-página-de-edição">4.5. Rota para Página de Edição</h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">&#39;/editar/&lt;int:id&gt;&#39;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pagina_editar(<span class="bu">id</span>):</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    cursor.execute(<span class="st">&quot;SELECT * FROM livro WHERE id = </span><span class="sc">%s</span><span class="st">&quot;</span>, (<span class="bu">id</span>,))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    livro <span class="op">=</span> cursor.fetchone()</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> render_template(<span class="st">&#39;editar.html&#39;</span>, livro<span class="op">=</span>livro)</span></code></pre></div>
+<h3 id="rota-para-editar-livro">4.6. Rota para Editar Livro</h3>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">&#39;/editar/salvar/&lt;int:id&gt;&#39;</span>, methods<span class="op">=</span>[<span class="st">&#39;POST&#39;</span>])</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> editar_livro(<span class="bu">id</span>):</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    titulo <span class="op">=</span> request.form[<span class="st">&#39;titulo&#39;</span>]</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    ano_publicacao <span class="op">=</span> request.form[<span class="st">&#39;ano_publicacao&#39;</span>]</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    editora <span class="op">=</span> request.form[<span class="st">&#39;editora&#39;</span>]</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    isbn <span class="op">=</span> request.form[<span class="st">&#39;isbn&#39;</span>]</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    query <span class="op">=</span> <span class="st">&quot;UPDATE livro SET titulo = </span><span class="sc">%s</span><span class="st">, ano_publicacao = </span><span class="sc">%s</span><span class="st">, editora = </span><span class="sc">%s</span><span class="st">, isbn = </span><span class="sc">%s</span><span class="st"> WHERE id = </span><span class="sc">%s</span><span class="st">&quot;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> (titulo, ano_publicacao, editora, isbn, <span class="bu">id</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    cursor.execute(query, values)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    db.commit()</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> redirect(url_for(<span class="st">&#39;listar&#39;</span>))</span></code></pre></div>
+<h3 id="rota-para-deletar-livro">4.7. Rota para Deletar Livro</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.route</span>(<span class="st">&#39;/deletar/&lt;int:id&gt;&#39;</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> deletar(<span class="bu">id</span>):</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    cursor.execute(<span class="st">&quot;DELETE FROM livro WHERE id = </span><span class="sc">%s</span><span class="st">&quot;</span>, (<span class="bu">id</span>,))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    db.commit()</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> redirect(url_for(<span class="st">&#39;listar&#39;</span>))</span></code></pre></div>
+<h2 id="inicialização-do-servidor">5. Inicialização do Servidor</h2>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&#39;__main__&#39;</span>:</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    app.run(debug<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
+<h2 id="templates-html">6. Templates HTML</h2>
+<h3 id="templatesindex.html">6.1. templates/index.html</h3>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;!DOCTYPE</span> html<span class="dt">&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">html</span><span class="ot"> lang</span><span class="op">=</span><span class="st">&quot;pt-BR&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">meta</span><span class="ot"> charset</span><span class="op">=</span><span class="st">&quot;UTF-8&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">meta</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;viewport&quot;</span><span class="ot"> content</span><span class="op">=</span><span class="st">&quot;width=device-width, initial-scale=1.0&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">title</span><span class="dt">&gt;</span>Sistema de Biblioteca<span class="dt">&lt;/</span><span class="kw">title</span><span class="dt">&gt;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Sistema de Gestão de Biblioteca<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Menu Principal<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;listar&#39;) }}&quot;</span><span class="dt">&gt;</span>Ver todos os livros<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">li</span><span class="dt">&gt;&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;pagina_criar&#39;) }}&quot;</span><span class="dt">&gt;</span>Adicionar novo livro<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;&lt;/</span><span class="kw">li</span><span class="dt">&gt;</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">ul</span><span class="dt">&gt;</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div>
+<h3 id="templatescriar.html">6.2. templates/criar.html</h3>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;!DOCTYPE</span> html<span class="dt">&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">html</span><span class="ot"> lang</span><span class="op">=</span><span class="st">&quot;pt-BR&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">meta</span><span class="ot"> charset</span><span class="op">=</span><span class="st">&quot;UTF-8&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">meta</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;viewport&quot;</span><span class="ot"> content</span><span class="op">=</span><span class="st">&quot;width=device-width, initial-scale=1.0&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">title</span><span class="dt">&gt;</span>Adicionar Novo Livro - Sistema de Biblioteca<span class="dt">&lt;/</span><span class="kw">title</span><span class="dt">&gt;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Adicionar Novo Livro<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">form</span><span class="ot"> action</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;criar_livro&#39;) }}&quot;</span><span class="ot"> method</span><span class="op">=</span><span class="st">&quot;POST&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Informações do Livro<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;titulo&quot;</span><span class="dt">&gt;</span>Título:<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;text&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;titulo&quot;</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;titulo&quot;</span><span class="ot"> required maxlength</span><span class="op">=</span><span class="st">&quot;150&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;ano_publicacao&quot;</span><span class="dt">&gt;</span>Ano de Publicação:<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;number&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;ano_publicacao&quot;</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;ano_publicacao&quot;</span><span class="ot"> min</span><span class="op">=</span><span class="st">&quot;1000&quot;</span><span class="ot"> max</span><span class="op">=</span><span class="st">&quot;2024&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;editora&quot;</span><span class="dt">&gt;</span>Editora:<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;text&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;editora&quot;</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;editora&quot;</span><span class="ot"> maxlength</span><span class="op">=</span><span class="st">&quot;100&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;isbn&quot;</span><span class="dt">&gt;</span>ISBN:<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;text&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;isbn&quot;</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;isbn&quot;</span><span class="ot"> maxlength</span><span class="op">=</span><span class="st">&quot;20&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">button</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;submit&quot;</span><span class="dt">&gt;</span>Adicionar Livro<span class="dt">&lt;/</span><span class="kw">button</span><span class="dt">&gt;</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">button</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;reset&quot;</span><span class="dt">&gt;</span>Limpar Formulário<span class="dt">&lt;/</span><span class="kw">button</span><span class="dt">&gt;</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">form</span><span class="dt">&gt;</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">hr</span><span class="dt">&gt;</span></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>Navegação:<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;index&#39;) }}&quot;</span><span class="dt">&gt;</span>← Voltar ao Início<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span> | </span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;listar&#39;) }}&quot;</span><span class="dt">&gt;</span>Ver Lista de Livros<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div>
+<h3 id="templateslistar.html">6.3. templates/listar.html</h3>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;!DOCTYPE</span> html<span class="dt">&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">html</span><span class="ot"> lang</span><span class="op">=</span><span class="st">&quot;pt-BR&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">meta</span><span class="ot"> charset</span><span class="op">=</span><span class="st">&quot;UTF-8&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">meta</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;viewport&quot;</span><span class="ot"> content</span><span class="op">=</span><span class="st">&quot;width=device-width, initial-scale=1.0&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">title</span><span class="dt">&gt;</span>Lista de Livros - Sistema de Biblioteca<span class="dt">&lt;/</span><span class="kw">title</span><span class="dt">&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Lista de Livros<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;pagina_criar&#39;) }}&quot;</span><span class="dt">&gt;</span>+ Adicionar Novo Livro<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    {% if not livros %}</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Nenhum livro encontrado no sistema.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    {% else %}</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">table</span><span class="ot"> border</span><span class="op">=</span><span class="st">&quot;1&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">thead</span><span class="dt">&gt;</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>                <span class="dt">&lt;</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>ID<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>Título<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>Ano<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>Editora<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>ISBN<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">&lt;</span><span class="kw">th</span><span class="dt">&gt;</span>Ações<span class="dt">&lt;/</span><span class="kw">th</span><span class="dt">&gt;</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>                <span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;/</span><span class="kw">thead</span><span class="dt">&gt;</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">tbody</span><span class="dt">&gt;</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>                {% for livro in livros %}</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">&lt;</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>                        <span class="dt">&lt;</span><span class="kw">td</span><span class="dt">&gt;</span>{{ livro.id }}<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>                        <span class="dt">&lt;</span><span class="kw">td</span><span class="dt">&gt;</span>{{ livro.titulo }}<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>                        <span class="dt">&lt;</span><span class="kw">td</span><span class="dt">&gt;</span>{{ livro.ano_publicacao if livro.ano_publicacao else &#39;N/A&#39; }}<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>                        <span class="dt">&lt;</span><span class="kw">td</span><span class="dt">&gt;</span>{{ livro.editora if livro.editora else &#39;N/A&#39; }}<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>                        <span class="dt">&lt;</span><span class="kw">td</span><span class="dt">&gt;</span>{{ livro.isbn if livro.isbn else &#39;N/A&#39; }}<span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>                        <span class="dt">&lt;</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>                            <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;pagina_editar&#39;, id=livro.id) }}&quot;</span><span class="dt">&gt;</span>Editar<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>                            |</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>                            <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;deletar&#39;, id=livro.id) }}&quot;</span><span class="ot"> </span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a><span class="ot">                               onclick</span><span class="op">=</span><span class="st">&quot;return confirm(&#39;Tem certeza que deseja excluir este livro?&#39;)&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>                                Excluir</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>                            <span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>                        <span class="dt">&lt;/</span><span class="kw">td</span><span class="dt">&gt;</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">&lt;/</span><span class="kw">tr</span><span class="dt">&gt;</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>                {% endfor %}</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;/</span><span class="kw">tbody</span><span class="dt">&gt;</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">table</span><span class="dt">&gt;</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>Total de livros:<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;</span> {{ livros|length }}<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>    {% endif %}</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">hr</span><span class="dt">&gt;</span></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>Navegação:<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;index&#39;) }}&quot;</span><span class="dt">&gt;</span>← Voltar ao Início<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span> | </span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;pagina_criar&#39;) }}&quot;</span><span class="dt">&gt;</span>Adicionar Novo Livro<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div>
+<h3 id="templateseditar.html">6.4. templates/editar.html</h3>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;!DOCTYPE</span> html<span class="dt">&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">html</span><span class="ot"> lang</span><span class="op">=</span><span class="st">&quot;pt-BR&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">meta</span><span class="ot"> charset</span><span class="op">=</span><span class="st">&quot;UTF-8&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">meta</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;viewport&quot;</span><span class="ot"> content</span><span class="op">=</span><span class="st">&quot;width=device-width, initial-scale=1.0&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">title</span><span class="dt">&gt;</span>Editar Livro - Sistema de Biblioteca<span class="dt">&lt;/</span><span class="kw">title</span><span class="dt">&gt;</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Editar Livro<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">form</span><span class="ot"> action</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;editar_livro&#39;, id=livro.id) }}&quot;</span><span class="ot"> method</span><span class="op">=</span><span class="st">&quot;POST&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Informações do Livro<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;titulo&quot;</span><span class="dt">&gt;</span>Título:<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;text&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;titulo&quot;</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;titulo&quot;</span><span class="ot"> value</span><span class="op">=</span><span class="st">&quot;{{ livro.titulo }}&quot;</span><span class="ot"> required maxlength</span><span class="op">=</span><span class="st">&quot;150&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;ano_publicacao&quot;</span><span class="dt">&gt;</span>Ano de Publicação:<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;number&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;ano_publicacao&quot;</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;ano_publicacao&quot;</span><span class="ot"> value</span><span class="op">=</span><span class="st">&quot;{{ livro.ano_publicacao if livro.ano_publicacao }}&quot;</span><span class="ot"> min</span><span class="op">=</span><span class="st">&quot;1000&quot;</span><span class="ot"> max</span><span class="op">=</span><span class="st">&quot;2024&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;editora&quot;</span><span class="dt">&gt;</span>Editora:<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;text&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;editora&quot;</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;editora&quot;</span><span class="ot"> value</span><span class="op">=</span><span class="st">&quot;{{ livro.editora if livro.editora }}&quot;</span><span class="ot"> maxlength</span><span class="op">=</span><span class="st">&quot;100&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;isbn&quot;</span><span class="dt">&gt;</span>ISBN:<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;text&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;isbn&quot;</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;isbn&quot;</span><span class="ot"> value</span><span class="op">=</span><span class="st">&quot;{{ livro.isbn if livro.isbn }}&quot;</span><span class="ot"> maxlength</span><span class="op">=</span><span class="st">&quot;20&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">button</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;submit&quot;</span><span class="dt">&gt;</span>Salvar Alterações<span class="dt">&lt;/</span><span class="kw">button</span><span class="dt">&gt;</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&lt;</span><span class="kw">button</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;reset&quot;</span><span class="dt">&gt;</span>Restaurar Valores<span class="dt">&lt;/</span><span class="kw">button</span><span class="dt">&gt;</span></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">form</span><span class="dt">&gt;</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">hr</span><span class="dt">&gt;</span></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">h3</span><span class="dt">&gt;</span>Informações do Livro<span class="dt">&lt;/</span><span class="kw">h3</span><span class="dt">&gt;</span></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>ID:<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;</span> {{ livro.id }}<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>Título Atual:<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;</span> {{ livro.titulo }}<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">hr</span><span class="dt">&gt;</span></span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>Navegação:<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;index&#39;) }}&quot;</span><span class="dt">&gt;</span>← Voltar ao Início<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span> | </span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;listar&#39;) }}&quot;</span><span class="dt">&gt;</span>Ver Lista de Livros<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span> |</span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;{{ url_for(&#39;pagina_criar&#39;) }}&quot;</span><span class="dt">&gt;</span>Adicionar Novo Livro<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div>
+<h2 id="observações-importantes">7. Observações Importantes:</h2>
+<ol type="1">
+<li><p>Certifique-se de criar o banco de dados <code>biblioteca</code> e
+a tabela <code>livro</code> com os campos necessários antes de executar
+a aplicação.</p></li>
+<li><p>As páginas HTML devem estar na pasta <code>templates/</code>. O
+Flask automaticamente procura os templates nesta pasta.</p></li>
+<li><p>Principais diferenças da sintaxe do Flask em relação ao EJS:</p>
+<ul>
+<li>Use <code>{{ }}</code> para expressões ao invés de
+<code>&lt;%= %&gt;</code></li>
+<li>Use <code>{% %}</code> para lógica de controle ao invés de
+<code>&lt;% %&gt;</code></li>
+<li>Use <code>url_for()</code> para gerar URLs ao invés de caminhos
+diretos</li>
+<li>Os dados do banco vêm como objetos, então use notação de ponto
+(livro.id, livro.titulo, etc.)</li>
+</ul></li>
+<li><p>Para executar o servidor, use o comando:</p></li>
+</ol>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>python app.py</span></code></pre></div>

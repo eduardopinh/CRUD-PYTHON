@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Livro - Sistema de Biblioteca</title>
+</head>
+<body>
+    <h1>Editar Livro</h1>
+    
+    <form action="{{ url_for('editar_livro', id=livro.id) }}" method="POST">
+        <h2>Informações do Livro</h2>
+        
+        <p>
+            <label for="titulo">Título:</label><br>
+            <input type="text" id="titulo" name="titulo" value="{{ livro.titulo }}" required maxlength="150">
+        </p>
+        
+        <p>
+            <label for="ano_publicacao">Ano de Publicação:</label><br>
+            <input type="number" id="ano_publicacao" name="ano_publicacao" value="{{ livro.ano_publicacao if livro.ano_publicacao }}" min="1000" max="2024">
+        </p>
+        
+        <p>
+            <label for="editora">Editora:</label><br>
+            <input type="text" id="editora" name="editora" value="{{ livro.editora if livro.editora }}" maxlength="100">
+        </p>
+        
+        <p>
+            <label for="isbn">ISBN:</label><br>
+            <input type="text" id="isbn" name="isbn" value="{{ livro.isbn if livro.isbn }}" maxlength="20">
+        </p>
+        
+        <p>
+            <button type="submit">Salvar Alterações</button>
+            <button type="reset">Restaurar Valores</button>
+        </p>
+    </form>
+    
+    <hr>
+    
+    <h3>Informações do Livro</h3>
+    <p><strong>ID:</strong> {{ livro.id }}</p>
+    <p><strong>Título Atual:</strong> {{ livro.titulo }}</p>
+    
+    <hr>
+    
+    <p><strong>Navegação:</strong></p>
+    <p>
+        <a href="{{ url_for('index') }}">← Voltar ao Início</a> | 
+        <a href="{{ url_for('listar') }}">Ver Lista de Livros</a> |
+        <a href="{{ url_for('pagina_criar') }}">Adicionar Novo Livro</a>
+    </p>
+</body>
+</html>
