@@ -38,4 +38,4 @@ git push -u origin main
 OBS: Depois de confirmado o envio de repositório
 local para o remoto, toda alteração posterior
 deverá ser enviada ao Github com os comandos
-a seguir
+a seguir.
