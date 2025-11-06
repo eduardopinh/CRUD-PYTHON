@@ -21,4 +21,21 @@ git add .
 
 7) Adicionar mensagem
 para o envio ao github
-git commit -m "Sua mensagem"
+
+8)Alterar o nome da ramificação
+do repositório local (computador
+ou notebook) para "main"
+git branch -M main
+
+9) Referenciar o repositório local
+para o repositório remoto (Github)
+git remote add origin https://github.com/seu-repositorio-github.git
+
+10) Realizar o envio do repositório
+local para o remoto
+git push -u origin main
+
+OBS: Depois de confirmado o envio de repositório
+local para o remoto, toda alteração posterior
+deverá ser enviada ao Github com os comandos
+a seguir
